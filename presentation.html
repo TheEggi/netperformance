@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import src: local('Fira Code');
+
+      body { font-family: 'Fira Code'; }
+      h1, h2, h3 {
+        font-family: 'Fira Code';
+        font-weight: normal;
+      }
+      .remark-slide-content {
+        font-size: 26px !important;
+      }
+      .remark-code, .remark-inline-code { 
+        font-family: 'Fira Code'; 
+        font-size: 14px !important;
+      }
+      img {
+        max-width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# Performance
+
+---
+
+# Measurement / Tools
+
+1. What?
+2. How?
+  * Average vs Percentile
+3. Tools
+  * Visual Studio / VsPerfCmd (standalone)
+  * Performance Counters
+    * Category/Name
+---
+# Measurement / Tools
+
+![Default-aligned image](images/perfmon_1.png)
+---
+# Measurement / Tools
+
+![Default-aligned image](images/perfmon_2.png)
+---
+# Measurement / Tools
+Event Tracing for Window (PerfView)
+
+![Default-aligned image](images/perfview.png)
+---
+# Measurement / Tools
+WinDbg
+  * Pinned objects
+  * Objects on heap
+  * Objects after GC
+  * Threads most CPU
+---
+# Measurement / Tools
+WinDbg
+![Default-aligned image](images/windgb.png)
+---
+# Measurement / Tools - Paid
+  * dotMemory / dotPeek (R#)
+  * ANTS Memory / Performance Profiler (redgate)
+---
+
+# Garbage Collection
+
+1. SOH (Gen0/Gen1 Ephemeral)/Gen2
+  * < 85k bytes
+2. LOH
+  * compacted on demand (4.5.1 >)
+
+![Default-aligned image](images/memorynet.png)
+
+```
+  GCSettings.LargeObjectHeapCompactionMode = 
+    GCLargeObjectHeapCompactionMode.CompactOnce;
+  GC.Collect();     
+  
+```
+---
+# GC - Phases
+1. Suspension
+2. Mark
+3. Compact (relocation)
+4. Resume
+
+![Default-aligned image](images/gc_01.png)
+---
+# GC - Phases
+
+![Default-aligned image](images/gc_02.jpeg)
+---
+# GC - Workstation/Server
+
+![Default-aligned image](images/gc_03.jpeg)
+---
+# GC - Concurrent
+![Default-aligned image](images/gc_04.jpeg)
+
+---
+# GC - Configuration
+
+```xml
+<configuration>
+  <runtime>
+    <gcServer  
+      enabled="true|*false"/>
+    <gcConcurrent  
+      enabled="*true|false"/>
+  </runtime>
+</configuration>
+```
+---
+# GC CFG - Latency
+
+![Default-aligned image](images/gclatency_01.png)
+
+### .NET 4.6
+
+```c#
+bool regionStarted = false;
+try
+{
+  GC.Collect(2);
+  regionStarted = GC.TryStartNoGCRegion(3200000);
+}
+finally
+{
+  if (regionStarted)
+  {
+    GC.EndNoGCRegion();
+  }
+}
+```
+---
+# GC - Notification
+
+
+```c#
+GC.RegisterForFullGCNotification(maxGenerationThreshold,
+  largeObjectHeapThreshold);
+Task.Run(() => WaitForGC())
+private static WaitForGC(){
+  maxWaitMsec = 10000;
+  bool didCollect = false;
+  while(true){
+    GCNotificationStatus status = 
+      GC.WaitForFullGCApproach(maxWaitMsec);
+    switch(status){
+      case GCNotificationStatus.Succeeded:
+        if(!didCollect){
+          .. gc incoming..
+          GC.Collect(2);
+        }
+        didCollect = !didCollect;
+        break;
+      case GCNotificationStatus.Canceled
+        .. canceled
+        break;
+      case GCNotificationStatus.Timeout
+        .. timeout
+        break;
+    }
+  }
+}
+```
+---
+# Garbage Collection
+
+#.center[Die Young OR Live Forever]
+---
+# Async - Parallel
+
+* For/Foreach/Invoke
+* ParallelOptions
+  * CancellationToken
+  * MaxDegreeOfParallelism
+  * TaskScheduler
+
+---
+
+#Async - Thread Pool
+```c#
+  ThreadPool.SetMinThreads(workerThreads, ioThreads);
+  ThreadPool.GetMaxThreads(workerThreads, ioThreads);
+  ThreadPool.GetMinThreads(workerThreads, ioThreads);
+```
+---
+
+#Async - Sync
+1. No locks!
+2. Interlocked methods
+3. lock/Monitor
+4. Async locks
+5. Other methods
+---
+
+    </textarea>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create({
+        highlightLanguage: 'c#',
+        highlightStyle: 'github',
+      });
+    </script>
+  </body>
+</html>
