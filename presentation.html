@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Title</title>
+    <title>.NET Performance</title>
     <meta charset="utf-8">
     <style>
       @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
@@ -197,14 +197,104 @@ private static WaitForGC(){
 ```
 ---
 
-#Async - Sync
+#Async - Sync.
 1. No locks!
 2. Interlocked methods
 3. lock/Monitor
 4. Async locks
 5. Other methods
 ---
+# Sync. example
+- Super simple
+```c#
+  var values = new List<int>();
+  for (int i = 0; i < 1000; i++)
+  {
+      values.Add(ComplicatedCalculation(i));
+  }
+```
 
+- Parallel without lock and no sync
+```c#
+var values = new List<int>();
+Parallel.For(0,
+             1000,
+             i =>
+             {
+                values.Add(ComplicatedCalculation(i));
+             });
+```
+---
+# Sync. example
+- Parallel with lock
+```c#
+var values = new List<int>();
+Parallel.For(0,
+             1000,
+             i =>
+             {
+                lock (sync)
+                {
+                  values.Add(ComplicatedCalculation(i));
+                }
+             });
+```
+---
+# Sync. example
+- Parallel "without" lock
+```c#
+var values = new List<int>();
+Parallel.For(0,
+             1000,
+             i =>
+             {
+                lock (sync)
+                {
+                  values.Add(ComplicatedCalculation(i));
+                }
+             });
+```
+- Parallel without lock
+```c#
+var values = new int[10000];
+             Parallel.For(0,
+                    10000,
+                    i =>
+                    {
+                        values[i] = ComplicatedCalculation(i);
+                    });
+```
+---
+# Sync. Results
+
+|Test|ms|
+|---|---|
+|Super simple|15656|
+|Parallel without lock and no sync|-|
+|Parallel with lock|373792|
+|Parallel "without" lock|14013|
+|Parallel without lock|9855|
+---
+# Concurrent Collections
+- Lock free
+```c#
+    ConcurrentQueue<T>, ConcurrentStack<T>
+```
+- Tries to stay lock free
+```c#
+    ConcurrentBag<T>
+```
+- Fine-grained locking
+```c#
+    ConcurrentDictionary<TKey, TValue>
+```
+---
+# Sources
+- <a href="https://msdn.microsoft.com/en-us/library/ee787088(v=vs.110).aspx">Fundamentals of Garbage Collection</a>
+- <a href="https://www.amazon.de/Writing-High-Performance-NET-Code-Watson/dp/0990583430/ref=sr_1_1?ie=UTF8&qid=1478101486&sr=8-1&keywords=.net+performance
+]">Writing High-Performance .NET Code</a>
+- <a href="http://download.microsoft.com/download/B/C/F/BCFD4868-1354-45E3-B71B-B851CD78733D/PerformanceCharacteristicsOfThreadSafeCollection.pdf">Patterns of Parallel Programming: Best Practices with the .NET Framework 4</a>
+- <a href="https://www.amazon.de/Pro-NET-Performance-Optimize-Applications/dp/1430244585/ref=sr_1_2?ie=UTF8&qid=1478101486&sr=8-2&keywords=.net+performance">Pro .NET Performance: Optimize Your C#</a>
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
     </script>
