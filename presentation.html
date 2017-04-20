@@ -41,7 +41,6 @@ class: center, middle
 3. Tools
   * Visual Studio / VsPerfCmd (standalone)
   * Performance Counters
-    * Category/Name
 ---
 # Measurement / Tools
 
@@ -68,14 +67,18 @@ WinDbg
 ![Default-aligned image](images/windgb.png)
 ---
 # Measurement / Tools - Paid
-  * dotMemory / dotPeek (R#)
+  * dotMemory / dotTrace (R#)
   * ANTS Memory / Performance Profiler (redgate)
 ---
+# Garbage Collection
 
+![Default-aligned image](http://mattwarren.org/images/2016/06/GC%20Visualisation.gif)
+
+---
 # Garbage Collection
 
 1. SOH (Gen0/Gen1 Ephemeral)/Gen2
-  * < 85k bytes
+  * < 85kb
 2. LOH
   * compacted on demand (4.5.1 >)
 
@@ -96,17 +99,22 @@ WinDbg
 
 ![Default-aligned image](images/gc_01.png)
 ---
-# GC - Phases
+# GC - Basic
 
 ![Default-aligned image](images/gc_02.jpeg)
 ---
-# GC - Workstation/Server
+# GC - Server
 
 ![Default-aligned image](images/gc_03.jpeg)
 ---
 # GC - Concurrent
 ![Default-aligned image](images/gc_04.jpeg)
-
+---
+# GC - Workstation Background
+![Default-aligned image](images/workstation_concurrent.jpeg)
+---
+# GC - Server Background
+![Default-aligned image](images/server_concurrent.jpg)
 ---
 # GC - Configuration
 
